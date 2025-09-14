@@ -19,37 +19,39 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Setup Gradle
-      uses: gradle/gradle-build-action@v2
-      with:
-        gradle-version: 8.4
+    - name: Force Create Gradle Wrapper
+      run: |
+        # Remove any existing gradle files
+        rm -rf gradle/wrapper
+        rm -f gradlew gradlew.bat
+        
+        # Install Gradle directly
+        wget https://services.gradle.org/distributions/gradle-8.4-bin.zip
+        unzip -q gradle-8.4-bin.zip
+        export PATH=$PATH:$PWD/gradle-8.4/bin
+        
+        # Generate wrapper using installed Gradle
+        gradle wrapper --gradle-version 8.4
+        
+        # Verify wrapper was created
+        ls -la gradlew
+        ls -la gradle/wrapper/
+        
+        # Test wrapper
+        ./gradlew --version
         
     - name: Create local.properties
       run: echo "sdk.dir=$ANDROID_HOME" > local.properties
       
-    - name: List project files
-      run: |
-        echo "=== Project Structure ==="
-        find . -type f -name "*.gradle" -o -name "*.xml" -o -name "*.java" -o -name "*.properties" | head -20
-        echo "=== Gradle files ==="
-        ls -la *.gradle || echo "No gradle files in root"
-        ls -la app/*.gradle || echo "No gradle files in app"
-        
-    - name: Build with Gradle directly
-      run: gradle assembleDebug --stacktrace --info
+    - name: Clean project
+      run: ./gradlew clean
       
-    - name: Find APK files
-      run: |
-        echo "=== Searching for APK files ==="
-        find . -name "*.apk" -type f || echo "No APK files found"
-        echo "=== Build outputs directory ==="
-        find . -path "*/build/outputs*" -type d || echo "No build outputs found"
-        
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --stacktrace
+      
     - name: Upload APK
       uses: actions/upload-artifact@v4
       if: success()
       with:
         name: sponsored-detector-apk
-        path: |
-          app/build/outputs/apk/debug/*.apk
-          **/build/outputs/apk/debug/*.apk
+        path: app/build/outputs/apk/debug/*.apk
