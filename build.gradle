@@ -1,11 +1,11 @@
 buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.1.2'
     }
+}
+
+allprojects {
+    // You can remove this block if all subprojects inherit repositories from settings.gradle
 }
 
 task clean(type: Delete) {
