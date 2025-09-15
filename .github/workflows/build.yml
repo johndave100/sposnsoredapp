@@ -12,6 +12,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     - uses: android-actions/setup-android@v3
+    - name: Download gradlew script
+      run: |
+        curl -L -o gradlew https://raw.githubusercontent.com/gradle/gradle/master/gradlew
+        chmod +x gradlew
     - name: Fix Gradle Wrapper
       run: |
         curl -L -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/master/gradle/wrapper/gradle-wrapper.jar
